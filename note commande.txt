@@ -1,0 +1,15 @@
+sudo dnf update : cette commande est pour mettre à jour les référenciels
+sudo dnf repolist: cette commande est pour vérifier si le paquet apache est présent dans le system
+sudo dnf install httpd: cette commande est pour installer apache sur rocky linux 
+sudo systemctl start httpd: cette commande est pour démarrer le serveur apache
+sudo systemctl enable httpd: cette commande est pour que le serveur démarre automatiquement
+sudo dnf update: cette commande est pour mettre à jour les paquets sur rocky 
+sudo dnf upgrade: cette commande mets à jour uniquement les paquets
+ sudo rpm --import https://repo.jellyfin.org/jellyfin_team.gpg.key: cette commande est la clé pour lé référenciel jellyfin télécharger 
+sudo vi /etc/yum.repos.d/jellyfin.repo: c'est pour configurer le ficher jellyfin dedans. on appuie sur "i" pour passer en mode insertion puis on cole un text
+
+
+
+
+
+

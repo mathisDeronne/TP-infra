@@ -49,27 +49,68 @@ enabled
 [mathis@SupraFlix ~]$ sudo systemctl is-enabled fail2ban
 enabled
 ```
-- on install Jellyfin, on mets à jour le système 
+
+- on met à jour les informations du système
 ```
-[oceane@supraflix ~]$ sudo apt-get update && sudo apt-get upgrade
+[oceane@supraflix ~]$ dnf update  
 ```
 - on ajoute le référenciel Jellyfin au système
 ```
-[oceane@supraflix ~]$ wget -O - https://repo.jellyfin.org/debian/jellyfin_team.gpg.key | sudo apt-key add -
-sudo sh -c "echo 'deb [arch=$( dpkg --print-architecture )] https://repo.jellyfin.org/debian $( lsb_release -c -s ) main' >> /etc/apt/sources.list.d/jellyfin.list"
+[oceane@supraflix ~]$ dnf install https://repo.jellyfin.org/releases/server/el/8/x86_64/jellyfin-server-10.7.0-1.el8.x86_64.rpm
 ```
-- on mets à jour le système et on install Jellyfin
-```
-[oceane@supraflix] sudo apt-get update && sudo apt-get install jellyfin
-```
+Cette commande va permettre d'installer la dernière version de Jellyfin qui est disponible pour rocky linux. 
+
 - on démarre le service Jellyfin 
 ```
 [oceane@supraflix ~]$ sudo systemctl start jellyfin
+[oceane@supraflix ~]$ sudo systemctl enable jellyfin
 ``` 
 - On vérifie que le service Jellyfin fonctionne correctement
 ```
 [oceane@supraflix ~]$  http://adresse_IP_du_serveur:8096
 ```
+(spoileur alerte: ça ne fonctionne pas)
+- on remet les paquets à jour pour NGINX
+```
+[oceane@supraflix ~]$ sudo snf update
+```
+- on installe NGINX
+```
+[oceane@supraflix ~]$ sudo dnf install nginx
+```
+- on démarrer le service NGINX 
+```
+[oceane@supraflix ~]$ sudo systemctl start nginx
+```
+- On regarde l'état du service NGINX
+```
+[oceane@supraflix ~]$ sudo systemctl status nginx
+
+● nginx.service - The nginx HTTP and reverse proxy server
+     Loaded: loaded (/usr/lib/systemd/system/nginx.service; enabled; vendor preset: disabled)
+     Active: active (running) since Fri 2023-05-05 07:15:13 UTC; 1 day 4h ago
+   Main PID: 15733 (nginx)
+      Tasks: 2 (limit: 10577)
+     Memory: 2.0M
+        CPU: 87ms
+     CGroup: /system.slice/nginx.service
+             ├─15733 "nginx: master process /usr/sbin/nginx"
+             └─15734 "nginx: worker process"
+
+May 05 07:15:13 SupraFlix.stream systemd[1]: Starting The nginx HTTP and reverse proxy server...
+May 05 07:15:13 SupraFlix.stream nginx[15731]: nginx: the configuration file /etc/nginx/nginx.conf syntax is ok
+May 05 07:15:13 SupraFlix.stream nginx[15731]: nginx: configuration file /etc/nginx/nginx.conf test is successful
+May 05 07:15:13 SupraFlix.stream systemd[1]: Started The nginx HTTP and reverse proxy server.
+```
+Ensuite, on ouvre le navigateur web et on y rentre l'adresse IP de la machine pour vérifier que cela fonctionne bien. Spoleur alerte: ça fonctionne.
+
+- on démarre automatique le service NGINX
+```
+[oceane@supraflix ~]$ sudo systemctl enable nginx
+```
+
+
+
 - installation d'un firewall sur rocky linux
 ```
 [oceane@supraflix ~]$
@@ -84,12 +125,37 @@ sudo systemctl start firewalld
 ```
 [oceane@supraflix ~]$
 sudo systemctl status firewalld
-``` 
-- on installe et on démarre Docker sur rocky linux 
-``` 
-[oceane@supraflix ~]$
-sudo systemctl start docker
 
+● firewalld.service - firewalld - dynamic firewall daemon
+     Loaded: loaded (/usr/lib/systemd/system/firewalld.service; enabled; vendor preset: enabled)
+     Active: active (running) since Tue 2023-05-02 11:34:27 UTC; 4 days ago
+       Docs: man:firewalld(1)
+   Main PID: 692 (firewalld)
+      Tasks: 4 (limit: 10577)
+     Memory: 46.6M
+        CPU: 2.198s
+     CGroup: /system.slice/firewalld.service
+             └─692 /usr/bin/python3 -s /usr/sbin/firewalld --nofork --nopid
+
+May 02 11:34:32 SupraFlix.stream firewalld[692]: WARNING: COMMAND_FAILED: '/usr/sbin/iptables -w10 -t filter -X DOCKER-ISOLATION-STAGE-1' failed: iptables: No chain/target/match by that>
+```
+- On met à jour les paquets pour Docker
+```
+[oceane@supraflix ~]$  sudo dnf update
+ ```` 
+
+ - On ajoute le référenciel Docker 
+ ``` 
+ [oceane@supraflix ~]$ sudo dnf config-manager --add-repo=https://download.docker.com/linux/rocky/docker-ce.repo
+ ```
+- On installe docker
+``` 
+[oceane@supraflix ~]$ sudo dnf install -y docker-ce docker-ce-cli containerd.io
+```
+- On démarre le service Docker
+```
+[oceane@supraflix ~]$ sudo systemctl start docker
+[oceane@supraflix ~]$ sudo systemctl enable docker
 ``` 
 - on vérifie que Docker fonctionne 
 ````
@@ -104,47 +170,27 @@ Built:             Mon Mar 27 16:19:13  2023
 OS/Arch:           linux/amd64
 Context:           default
 permission denied while trying to connect to the Docker daemon socket at unix:///var/run/docker.sock: Get "http://%2Fvar%2Fdocker.sock/v1.24/version": dial unix /var/run/docker.nect: permission denied
-``` 
 
 ```` 
-- on démarre automatiquement le système Docker 
- ```
- [oceane@supraflix ~]$
- sudo systemctl enable docker
- Created symlink /etc/systemd/system/multi-user.target.wants/docker.service -> /usr/lib/system/docker.service.
 
- ``` 
-
- - 
-
- ```
- [oceane@supraflix ~]$ sudo !!
- sudo docker pull jellyfin/jellyfin
- using default tag: latest
- latest: pulling from jellygin/jellyfin
- 8740c948ffd4: Pull complete
- e318c113e9bf: Pull complete
- 28f984869f48: Pull complete
- 9f168e5cffa: Pull complete 
-Digest: sha256:97ae358b2f9091c6f745c47d9342cc615c73e3d672d8ac383385548afc836e28
-Status: Downloaded newer image for jellyfin/jellyfin: latest
-docker.io/jellyfin/jellyfin:latest
-``` 
-
+- On fait une connexion ssh sans rentrer mot de passe sur rocky linux
+- On génère une clé ssh 
 ```
-- 
-``` 
-[oceane@supraflix ~]$ sudo !!
-sudo docker volume create jellyfin-config 
-[sudo] passeword for oceane:
-jellyfin-config
+[oceane@supraflix ~]$  ssh-keygen -t rsa
 ```
+- On copie la clé public 
+```
+[oceane@supraflix ~]$ ssh-copy-id oceane@supraflix@152.228.173.158
+```
+- On se connecte 
+```
+PS C:\Users\rouss> ssh oceane@152.228.173.158
+Last login: Sat May  6 12:09:36 2023 from 77.131.222.48
+[oceane@SupraFlix ~]$
+```
+(Et sans mot de passe)
 
-``` 
-- 
-``` 
-[oceane@supraflix ~]$ sudo !!
-sudo docker volume create jellyfin-cache
-jellyfin cache
-```
+
+
+
 
